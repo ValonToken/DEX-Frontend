@@ -1,0 +1,116 @@
+<div class="row">
+  <div class="col-sm-12">
+
+    <!-- TOAST -->
+    <div style="z-index: 9999; position: fixed; top: 40px; right: 40px; opacity: 0.85">
+      <app-toast style="position: fixed; top: 40px; right: 40px; width: 200px" uID="toastError" toastTitle="Error" toastClass="m-b-10 toast-danger">
+        {{toastMsg}}
+      </app-toast>
+      <app-toast style="position: fixed; top: 40px; right: 40px; width: 200px" uID="toastSuccess" toastTitle="Success" toastClass="m-b-10 toast-success">
+        {{toastMsg}}
+      </app-toast>
+    </div>
+    
+    <app-alert *ngIf="!state?.connected" style="margin: 20px" type="danger">Connect to a Wallet!</app-alert>
+
+    <app-card cardTitle="Wallet Address" [hidHeader]="true" blockClass="valon-box">
+      <div class="valon-icon-color valon-anim-size-3">
+        <!-- HEADER -->
+        <div class="pt-2 pb-2" style="border-bottom: 1px solid #4f86be">
+          <h5 class="valon-title">Wallet</h5>
+        </div>
+
+        <div *ngIf="loading" class="d-flex justify-content-center mt-4">
+          <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+        
+        <ng-container>
+          <!-- GENERATE KEYS -->
+          <form *ngIf="!loading" [formGroup]="form" class="mb-5">
+            <div class="pt-3">
+              <div class="form-group fill mt-3">
+                <label class="valon-sub-title">Wallet Address</label>
+                <div class="input-group valon-input-group">
+                  <input readonly formControlName="publicKey" type="text" class="form-control pl-2 valon-input" id="publicKey">
+                  <div class="input-group-append pl-1">
+                    <button (click)="copyPublicKey()" class="btn valon-btn-primary" type="button">
+                      <i class="feather icon-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </ng-container>
+
+        <!--<qr-code value="Yo world!" size="300" errorCorrectionLevel="M"></qr-code>-->
+
+        <div style="position: fixed; top: 40px; right: 40px; opacity: 0.85">
+          <app-toast uID="toastRight" toastTitle="Key Copied!" toastCaption="" toastClass="m-b-10 toast-success">
+            The key was copied to the clipboard
+          </app-toast>
+        </div>
+      </div>
+    </app-card>
+
+    <!-- ASSETS -->
+    <app-card cardTitle="Assets" [hidHeader]="true" blockClass="valon-box">
+      <div class="valon-icon-color valon-anim-size-5">
+        <!-- HEADER -->
+        <div class="pt-2 pb-2" style="border-bottom: 1px solid #4f86be">
+          <h5 class="valon-title">Assets</h5>
+          <button *ngIf="!showAllAssets" (click)="toggleShowAllAssets()" style="width: 130px; position: absolute; top: 10px; right: 10px; padding: 5px" class="btn valon-btn-success" type="button">
+            <span>Show All</span>
+          </button>
+          <button *ngIf="showAllAssets" (click)="toggleShowAllAssets()" style="width: 130px; position: absolute; top: 10px; right: 10px; padding: 5px" class="btn valon-btn-success" type="button">
+            <span>Show Owned</span>
+          </button>
+        </div>
+
+        <div *ngIf="loading" class="d-flex justify-content-center mt-4">
+          <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+
+        <!-- BNB -->
+        <div class="pt-3">
+          <div class="form-group fill mt-3">
+            <label class="valon-sub-title">Binance</label>
+            <div class="input-group valon-input-group">
+              <input readonly type="text" class="form-control pl-2 valon-input" id="Binance" value="{{form.get('bnbBalance').value | formatNumber:8}}">
+              <div class="input-group-append pl-1">
+                <button style="width: 100px" class="btn valon-btn-primary" type="button">
+                  BNB
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- OTHER COINS -->
+        <ng-container *ngFor="let coin of supportedCoinsList; let i = index">
+          <div *ngIf="(!showAllAssets && coin.data?.balance > 0) || showAllAssets" class="pt-3">
+            <div class="form-group fill mt-3">
+              <label class="valon-sub-title">{{coin.name}}</label>
+              <div class="input-group valon-input-group">
+                <input readonly type="text" class="form-control pl-2 valon-input" id="{{coin.name}}" value="{{coin.data?.balance | formatNumber:8}}">
+                <div class="input-group-append pl-1">
+                  <button (click)="registerToken(coin)" style="width: 150px" class="btn valon-btn-primary mr-1" type="button">
+                    Add To Wallet
+                  </button>
+                  <button style="width: 100px" class="btn valon-btn-primary" type="button">
+                    {{coin.symbol | uppercase}}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </app-card>
+
+  </div>
+</div>

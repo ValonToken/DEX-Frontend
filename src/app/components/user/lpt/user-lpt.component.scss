@@ -1,0 +1,16 @@
+button {
+    color: lightgray;
+}
+
+.btn:disabled {
+    color: white;
+}
+
+button:hover {
+    color: white;
+}
+
+.center-flex {
+    display: flex;
+    justify-content: center;
+}

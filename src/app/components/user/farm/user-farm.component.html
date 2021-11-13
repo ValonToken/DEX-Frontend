@@ -1,0 +1,287 @@
+<div class="row">
+  <div class="col-sm-12">
+
+    <!-- TOAST -->
+    <div style="z-index: 9999; position: fixed; top: 40px; right: 40px; opacity: 0.85">
+      <app-toast style="position: fixed; top: 40px; right: 40px; width: 200px" uID="toastError" toastTitle="Error" toastClass="m-b-10 toast-danger">
+        {{toastMsg}}
+      </app-toast>
+      <app-toast style="position: fixed; top: 40px; right: 40px; width: 200px" uID="toastSuccess" toastTitle="Success" toastClass="m-b-10 toast-success">
+        {{toastMsg}}
+      </app-toast>
+    </div>
+
+    <app-alert *ngIf="!state?.connected" style="margin: 20px" type="danger">Connect to a Wallet!</app-alert>
+
+    <!-- FARMS -->
+    <app-card [hidHeader]="true" cardClass="bg-pattern bg-blue" blockClass="valon-box-pattern">
+      <div class="valon-icon-color valon-anim-size-7">
+        <span (click)="openHelp()" class="valon-help-text">How to use?</span>
+        <h1 class="text-center mb-4"><span class="text-success">Valon Liquidity Farms</span></h1>
+        <h4 class="text-center mb-4">Stake LPT & Earn Valon Rewards</h4>
+        <form [formGroup]="form" class="row justify-content-center">
+          <div class="col-sm-12">
+            <!--<div class="px-sm-4 py-sm-4 bg-white rounded-lg shadow-sm" style="border: 1px solid #152f49">-->
+
+              <ng-container *ngIf="loadingFarms">
+                <div style="text-align: center; margin-top: 20px"><h2>Loading the Farms</h2></div>
+                <div class="d-flex justify-content-center mt-4">
+                  <div class="spinner-border" role="status">
+                    <span class="sr-only"></span>
+                  </div>
+                </div>
+              </ng-container>
+
+              <!-- farm cards -->
+              <div *ngIf="!loadingFarms && farms.length > 0" class="d-flex justify-content-center flex-wrap">
+
+                <div *ngFor="let farm of farms" class="p-2 bd-highlight valon-farm-card" [style.height]="farm.showDetails ? '550px' : '400px'">
+                  <div class="valon-farm-icon-color"></div>
+                  <div class="valon-farm-container">
+                    <div class="valon-farm-header">
+                      <h2>
+                        {{getSymbol(farm.token0)}}-{{getSymbol(farm.token1)}} Pool
+                        <i (click)="openBscScanUrl(farm)" class="feather icon-square" style="width: 20px; color: #7a98bd; position: relative; cursor: pointer">
+                          <i class="feather icon-arrow-up-right" style="width: 20px; color: white; position: absolute; bottom: 0; left: 0; font-size: 0.8rem"></i>
+                        </i>
+                      </h2>
+                      <div class="valon-farm-labels">
+                        <span class="valon-farm-label">{{farm.active ? 'Active' : 'Deactivated'}}</span>
+                        <span class="valon-farm-label">{{getBonus(farm.bonusMultiplier)}}x</span>
+                      </div>
+                      <img class="valon-farm-icon1" [src]="getIcon(farm.token0)">
+                      <img class="valon-farm-icon2" [src]="getIcon(farm.token1)">
+                    </div>
+                    <div class="valon-farm-content" [style.height]="farm.showDetails ? '430px' : '280px'">
+                      <div class="valon-farm-section1">
+                        <span class="valon-farm-title">LIQUIDITY POOL ESTIMATED APR</span><br>
+                        <span class="valon-farm-apy">{{farm.apr}}%</span><br>
+                        <span class="valon-farm-text">Stake {{getSymbol(farm.token0)}}-{{getSymbol(farm.token1)}} Liquidity pool tokens to start receiving rewards</span><br>
+                      </div>
+                      <div class="valon-farm-section2">
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">LPT Balance:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">{{getLptBalance(farm.lptBalance)}} <span class="valon-farm-currency">LPT</span></div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">Staked:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">{{getStake(farm.stakeAmount)}} <span class="valon-farm-currency">LPT</span></div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">Rewards:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">
+                            {{getStake(farm.actualRewards)}} <span class="valon-farm-currency">VALO</span>
+                          </div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div *ngIf="!farm.showDetails" (click)="showDetails(farm, true)" style="text-align: center; padding-top: 15px; cursor: pointer" class="col-sm-12 valon-farm-title2">
+                            Show Details
+                          </div>
+                        </div>
+                      </div>
+                      <div *ngIf="farm.showDetails" class="valon-farm-section3 pt-3">
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">Stakeholders:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">{{farm.stakeHolderCount?.toString()}} <span class="valon-farm-currency"></span></div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">Pair Liquidity:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">{{farm.pairLiquidity}} <span class="valon-farm-currency">$</span></div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">Pool Liquidity:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">{{farm.liquidity}} <span class="valon-farm-currency">$</span></div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">Pool Share:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">{{farm.poolShare}} <span class="valon-farm-currency">%</span></div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">Total Stakes:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">{{farm.totalPoolStakes | bignumberToEthers:' ':2}} <span class="valon-farm-currency">LPT</span></div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div class="col-sm-5 valon-farm-title2 pr-0">Total Rewards:</div>
+                          <div style="text-align: left" class="col-sm-7 valon-farm-value p-0">{{farm.totalPoolRewards | bignumberToEthers:' ':2}} <span class="valon-farm-currency">VALO</span></div>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <button *ngIf="!farm.lptAllowance.isZero()" (click)="resetFarmAllowance(farm)" style="width: 150px; padding: 0px; font-size: 0.7rem; margin: 0 auto; margin-top: 5px" class="btn valon-btn-warning" type="button">
+                            Reset Farm Allowances
+                          </button>
+                        </div>
+                        <div class="row flex-nowrap">
+                          <div (click)="showDetails(farm, false)" style="text-align: center; padding-top: 15px; cursor: pointer" class="col-sm-12 valon-farm-title2">
+                            Hide Details
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div *ngIf="hasFarmAllowance(farm)" class="valon-farm-footer">
+                      <ng-container *ngIf="!farm.claiming">
+                        <button [disabled]="farm.stakeAmount.isZero()" (click)="openRemoveStakeModal(farm)" style="width: 80px; padding: 10px 0px 10px 0px; margin-right: 10px; font-size: 0.7rem" class="btn valon-btn-danger" type="button">
+                          <i class="feather icon-x"></i>
+                          Remove
+                        </button>
+                        <button (click)="openAddStakeModal(farm)" [disabled]="farm.lptBalance.isZero()" style="width: 80px; padding: 10px 0px 10px 0px; margin-right: 10px; font-size: 0.7rem" class="btn valon-btn-success" type="button">
+                          <i class="feather icon-check"></i>
+                          Stake
+                        </button>
+                        <button (click)="claimRewards(farm)" [disabled]="farm.actualRewards.isZero()" style="width: 80px; padding: 10px 0px 10px 0px; font-size: 0.7rem" class="btn valon-btn-gold" type="button">
+                          <i style="font-style: normal">$</i>
+                          Claim
+                        </button>
+                      </ng-container>
+                      <button *ngIf="farm.claiming" type="button" style="width: 250px; padding: 10px 0px 10px 0px; font-size: 0.7rem" class="btn valon-btn-warning">
+                        <span style="width: 15px; height: 15px" class="spinner-border" role="status">
+                          <span class="sr-only"></span>
+                        </span>
+                        Claiming Rewards!
+                      </button>
+                    </div>
+                    <div *ngIf="!hasFarmAllowance(farm)" class="valon-farm-footer">
+                      <button *ngIf="!farm.unlocking" (click)="approveFarm(farm)" style="width: 250px; padding: 10px 0px 10px 0px; font-size: 0.7rem" class="btn valon-btn-success" type="button">
+                        <i class="feather icon-check"></i>
+                        Unlock Farm
+                      </button>
+                      <button *ngIf="farm.unlocking" type="button" style="width: 250px; padding: 10px 0px 10px 0px; font-size: 0.7rem" class="btn valon-btn-warning">
+                        <span style="width: 15px; height: 15px" class="spinner-border" role="status">
+                          <span class="sr-only"></span>
+                        </span>
+                        Unlocking!
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            <!--</div>-->
+          </div>
+        </form>
+      </div>
+    </app-card>
+  </div>
+</div>
+
+<!-- STAKE MODAL -->
+<app-ui-modal dialogClass="valon-box" #modalStake>
+  <div class="app-modal-header">
+    <h5 *ngIf="dialogType === 'ADD_STAKE'" class="modal-title">Add Stake</h5>
+    <h5 *ngIf="dialogType === 'REMOVE_STAKE'" class="modal-title">Remove Stake</h5>
+    <button type="button" class="close basic-close" data-dismiss="modal" aria-label="Close" (click)="modalStake.hide()"><span aria-hidden="true">&times;</span></button>
+  </div>
+  <div class="app-modal-body" style="text-align: center; padding-top: 0">
+
+    <div *ngIf="dialogType === 'ADD_STAKE'" style="padding-bottom: 30px">
+      Add LPT into {{selectedFarm?.token0?.symbol | uppercase}}-{{selectedFarm?.token1?.symbol | uppercase}} Pool
+    </div>
+    <div *ngIf="dialogType === 'REMOVE_STAKE'" style="padding-bottom: 30px">
+      Remove LPT from {{selectedFarm?.token0?.symbol | uppercase}}-{{selectedFarm?.token1?.symbol | uppercase}} Pool
+    </div>
+
+    <div *ngIf="selectedFarm?.staking">
+      <div>
+        <h2 *ngIf="dialogType === 'ADD_STAKE'">Staking In Progress</h2>
+        <h2 *ngIf="dialogType === 'REMOVE_STAKE'">Removing Stake</h2>
+      </div>
+      <div  class="d-flex justify-content-center mt-4">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="transactionMined">
+      <i style="font-size: 60px" class="feather icon-check text-success"></i>
+      <h2 *ngIf="dialogType === 'ADD_STAKE'">Stake Success</h2>
+      <h2 *ngIf="dialogType === 'REMOVE_STAKE'">Stake Removed</h2>
+    </div>
+
+    <form *ngIf="!selectedFarm?.staking && !transactionMined" [formGroup]="form">
+      <div class="input-group" style="margin-bottom: 10px">
+        <input formControlName="stakeAmount" type="text" class="form-control pl-2" id="stake">
+        <div class="input-group-append pl-1">
+          <button style="width: 150px; font-size: 0.6rem" class="btn valon-btn-primary p-0" type="button">
+            {{selectedFarm?.token0?.symbol | uppercase}}-{{selectedFarm?.token1?.symbol | uppercase}} LPT
+          </button>
+        </div>
+        <input formControlName="stakeRange" min="0" max="1" step="0.001" type="range" class="form-control-range" id="stakeRange" style="margin-top: 20px">
+        <div style="padding-top: 25px; text-align: center; width: 100%">
+          <button (click)="setStakeRange(0.25)" style="padding: 0.3rem 1rem; margin-left: 10px"
+          class="btn valon-btn-success" type="button">
+            25%
+          </button>
+          <button (click)="setStakeRange(0.5)" style="padding: 0.3rem 1rem; margin-left: 10px"
+          class="btn valon-btn-success" type="button">
+            50%
+          </button>
+          <button (click)="setStakeRange(0.75)" style="padding: 0.3rem 1rem; margin-left: 10px"
+          class="btn valon-btn-success" type="button">
+            75%
+          </button>
+          <button (click)="setStakeRange(1)" style="padding: 0.3rem 1rem; margin-left: 10px"
+          class="btn valon-btn-success" type="button">
+            Max
+          </button>
+        </div>
+      </div>
+    </form>
+
+  </div>
+  <div class="app-modal-footer pb-2">
+    <ng-container *ngIf="dialogType === 'ADD_STAKE'">
+      <button *ngIf="!selectedFarm?.staking && !transactionMined" style="font-size: 10px" type="button" class="btn valon-btn-secondary" data-dismiss="modal" (click)="modalStake.hide()">
+        <ng-container>Close</ng-container>
+      </button>
+      <button *ngIf="!selectedFarm?.staking && !transactionMined" (click)="addStake()" [disabled]="form.get('stakeAmount')?.invalid || form.get('stakeAmount')?.value <= 0" style="margin-left: 5px; font-size: 10px" type="button" class="btn valon-btn-success">
+        <ng-container>Stake</ng-container>
+      </button>
+      <button *ngIf="!selectedFarm?.staking && transactionMined" style="margin-left: 5px; font-size: 10px" type="button" class="btn valon-btn-success" data-dismiss="modal" (click)="modalStake.hide()">
+        <ng-container>Ok</ng-container>
+      </button>
+    </ng-container>
+    <ng-container *ngIf="dialogType === 'REMOVE_STAKE'">
+      <button *ngIf="!selectedFarm?.staking && !transactionMined" style="font-size: 10px" type="button" class="btn valon-btn-secondary" data-dismiss="modal" (click)="modalStake.hide()">
+        <ng-container>Close</ng-container>
+      </button>
+      <button *ngIf="!selectedFarm?.staking && !transactionMined" (click)="removeStake()" [disabled]="form.get('stakeAmount')?.invalid || form.get('stakeAmount')?.value <= 0" style="margin-left: 5px; font-size: 10px" type="button" class="btn valon-btn-success">
+        <ng-container>Remove Stake</ng-container>
+      </button>
+      <button *ngIf="!selectedFarm?.staking && transactionMined" style="margin-left: 5px; font-size: 10px" type="button" class="btn valon-btn-success" data-dismiss="modal" (click)="modalStake.hide()">
+        <ng-container>Ok</ng-container>
+      </button>
+    </ng-container>
+  </div>
+</app-ui-modal>
+
+<!-- HELP MODAL -->
+<app-ui-modal #modalHelp dialogClass="valon-box">
+  <div class="app-modal-header">
+    <h5 class="modal-title">How to use?</h5>
+    <button type="button" class="close basic-close" data-dismiss="modal" aria-label="Close" (click)="modalHelp.hide()"><span aria-hidden="true">&times;</span></button>
+  </div>
+  <div class="app-modal-body" style="text-align: center; padding-top: 0">
+
+  <div>
+    <ul class="list-group valon-help-list">
+      <li class="list-group-item">1. You will need Liquidity Pool Tokens (LPT) <br>First add liquidity by navigating "Add Liquidity"</li>
+      <li class="list-group-item">2. Find the farm where you have LPT balance <br>Eg. VALO-BNB</li>
+      <li class="list-group-item">3. Unlock the farm if locked</li>
+      <li class="list-group-item">4. Add LPT into the pool by clicking "Stake" <br>Select the amount from the dialog</li>
+      <li class="list-group-item">5. Wait until the transaction finishes</li>
+      <li class="list-group-item">6. The pool info will update <br>Notice the stake should now be your staked amount</li>
+      <li class="list-group-item">7. You will start receiving rewards <br>Data will update every ~30 seconds</li>
+      <li class="list-group-item">8. The more your pool share is, the more rewards you generate</li>
+      <li class="list-group-item">9. Claim rewards will trasnfer the rewards into your wallet</li>
+      <li class="list-group-item">10. Remove stake when you wish to exit staking</li>
+      <li class="list-group-item">11. To remove liquidity completely, navigate "Remove Liquidity"</li>
+      <li class="list-group-item">Note: APR is calculated by using average stake sizes <br>It reflects the gained rewards during 1 year without compounding</li>
+    </ul>
+  </div>
+
+  </div>
+  <div class="app-modal-footer">
+    <button style="font-size: 10px" type="button" class="btn valon-btn-secondary" data-dismiss="modal" (click)="modalHelp.hide()">
+      <ng-container>Close</ng-container>
+    </button>
+  </div>
+</app-ui-modal>

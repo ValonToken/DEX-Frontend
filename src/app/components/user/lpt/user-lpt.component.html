@@ -1,0 +1,278 @@
+<div class="row">
+  <div class="col-sm-12">
+
+    <!-- TOAST -->
+    <div style="z-index: 9999; position: fixed; top: 40px; right: 40px; opacity: 0.85">
+      <app-toast style="position: fixed; top: 40px; right: 40px; width: 200px" uID="toastError" toastTitle="Error" toastClass="m-b-10 toast-danger">
+        {{toastMsg}}
+      </app-toast>
+      <app-toast style="position: fixed; top: 40px; right: 40px; width: 200px" uID="toastSuccess" toastTitle="Success" toastClass="m-b-10 toast-success">
+        {{toastMsg}}
+      </app-toast>
+    </div>
+
+    <app-alert *ngIf="!state?.connected" style="margin: 20px" type="danger">Connect to a Wallet!</app-alert>
+
+    <!-- LPT -->
+    <app-card [hidHeader]="true" cardClass="bg-pattern bg-blue" blockClass="valon-box-pattern">
+      <div class="valon-icon-color valon-anim-size-7">
+        <span (click)="openHelp()" class="valon-help-text">How to use?</span>
+        <h1 class="text-center mb-4"><span class="text-success">Liquidity Pool Tokens</span></h1>
+        <h4 class="text-center mb-4">LPT Balance & Remove Liquidity</h4>
+        <form [formGroup]="form" class="row justify-content-center">
+          <div class="col-sm-9">
+            <div class="px-sm-4 py-sm-4 bg-white rounded-lg shadow-sm" style="border: 1px solid #152f49">
+              <div class="row align-items-center" style="padding: 20px">
+
+                <!-- SELECT PAIR -->
+                <div class="col">
+                  <div class="input-group center-flex">
+                    <button *ngIf="!selectedLpt" class="btn valon-btn-primary btn-sl-sm ml-2" (click)="modalShow(true, 0)">Select LPT</button>
+                    <button *ngIf="selectedLpt" class="btn valon-btn-primary btn-sl-sm ml-2" (click)="modalShow(true, 0)">
+                      {{selectedLpt?.token0?.symbol | uppercase}}-{{selectedLpt?.token1?.symbol | uppercase}}
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- INFO BOX -->
+          <div *ngIf="selectedLpt" class="col-sm-9 mt-3">
+            <div class="px-sm-4 py-sm-4 bg-white rounded-lg shadow-sm" style="border: 1px solid #152f49">
+              <div style="text-align: center; border-bottom: 1px solid #4f86be;" class="pb-2">
+                <h5 class="valon-title">Remove LPT From Pool</h5>
+              </div>
+              <div style="text-align: center" class="pt-4">
+                <input formControlName="lptAmount" type="text" class="form-control pl-2" id="selectedLpt" style="background: #040617">
+              </div>
+              <div style="text-align: center" class="pt-4">
+                <button (click)="setLptRange(1, 0.25)" style="padding: 0.3rem 1rem; margin-left: 10px"
+                class="btn valon-btn-success" type="button">
+                  25%
+                </button>
+                <button (click)="setLptRange(1, 0.5)" style="padding: 0.3rem 1rem; margin-left: 10px"
+                class="btn valon-btn-success" type="button">
+                  50%
+                </button>
+                <button (click)="setLptRange(1, 0.75)" style="padding: 0.3rem 1rem; margin-left: 10px"
+                class="btn valon-btn-success" type="button">
+                  75%
+                </button>
+                <button (click)="setLptRange(1, 1)" style="padding: 0.3rem 1rem; margin-left: 10px"
+                class="btn valon-btn-success" type="button">
+                  Max
+                </button>
+              </div>
+              <div style="text-align: center">
+                <input formControlName="lptRange" min="0" max="1" step="0.001" type="range" class="form-control-range" id="lptRange" style="margin-top: 20px">
+              </div>
+              <div *ngIf="hasAllowances()" style="text-align: center" class="pt-4">
+                <button *ngIf="!removingLiquidity" (click)="removeLiquidity()" class="btn valon-btn-success btn-sl-sm ml-2">
+                  <i class="feather icon-check-circle"></i>
+                  Remove Liquidity
+                </button>
+                <button *ngIf="removingLiquidity" class="btn valon-btn-warning btn-sl-sm ml-2">
+                  <span style="width: 15px; height: 15px" class="spinner-border" role="status">
+                    <span class="sr-only"></span>
+                  </span>
+                  Removing Liquidity
+                </button>
+              </div>
+              <div *ngIf="!hasAllowances()" style="text-align: center" class="pt-4">
+                <button *ngIf="!loadingAllowance" class="btn valon-btn-warning btn-sl-sm ml-2" (click)="setAllowance('MAX')">Unlock LPT</button>
+                <button *ngIf="loadingAllowance" class="btn valon-btn-warning btn-sl-sm ml-2">
+                  <span style="width: 15px; height: 15px" class="spinner-border" role="status">
+                    <span class="sr-only"></span>
+                  </span>
+                  Unlocking LPT
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </app-card>
+
+    <!-- PAIR INFO -->
+    <app-card *ngIf="selectedLpt" cardTitle="Pair Info" cardTitle2="tessa" [hidHeader]="true" blockClass="valon-box">
+      <div class="valon-icon-empty valon-anim-size-10">
+        <i class="feather icon-help-circle valon-help valon-tooltip" style="position: absolute; top: 10px; right: 10px">
+          <span class="valon-tooltiptext valon-tooltip-left">Additional information of the selected coin pair</span>
+        </i>
+          
+        <div class="pt-2 pb-2" style="border-bottom: 1px solid #4f86be">
+          <h5 class="valon-title">LPT Pair Info</h5>
+        </div>
+        
+        <ng-container>
+          <div class="pt-3">
+            <div class="form-group fill mt-3">
+              <label class="valon-sub-title">LPT Address</label>
+              <div class="input-group">
+                <input readonly type="text" class="form-control pl-2" id="{{selectedLpt?.lptAddress}}" value="{{selectedLpt?.lptAddress}}">
+                <div class="input-group-append pl-1">
+                  <button (click)="copyPairAddress()" class="btn valon-btn-primary" type="button">
+                    <i class="feather icon-copy"></i>
+                  </button>
+                </div>
+                <div class="input-group-append pl-1">
+                  <button style="width: 100px" class="btn valon-btn-primary" type="button">
+                    Address
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3">
+            <div class="form-group fill mt-3">
+              <label class="valon-sub-title">Token #1 Name</label>
+              <div class="input-group">
+                <input readonly type="text" class="form-control pl-2" id="token0" value="{{selectedLpt?.token0?.name}}">
+                <div class="input-group-append pl-1">
+                  <button style="width: 100px" class="btn valon-btn-primary" type="button">
+                    {{selectedLpt?.token0?.symbol}}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3">
+            <div class="form-group fill mt-3">
+              <label class="valon-sub-title">Token #2 Name</label>
+              <div class="input-group">
+                <input readonly type="text" class="form-control pl-2" id="token1" value="{{selectedLpt?.token1?.name}}">
+                <div class="input-group-append pl-1">
+                  <button style="width: 100px" class="btn valon-btn-primary" type="button">
+                    {{selectedLpt?.token1?.symbol}}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3">
+            <div class="form-group fill mt-3">
+              <label class="valon-sub-title">LPT Balance</label>
+              <div class="input-group">
+                <input readonly type="text" class="form-control pl-2" id="lptBalance" value="{{selectedLpt?.balance | bignumberToEthers}}">
+                <div class="input-group-append pl-1">
+                  <button style="width: 100px" class="btn valon-btn-primary" type="button">
+                    LPT
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pt-3">
+            <div class="form-group fill mt-3">
+              <label class="valon-sub-title">Allowance</label>
+              <div class="input-group">
+                <input readonly type="text" class="form-control pl-2" id="lptAllowance" value="{{selectedLpt?.allowance | bignumberToEthers}}">
+                <div class="input-group-append pl-1">
+                  <ng-container *ngIf="!selectedLpt?.allowance?.isZero()">
+                    <button *ngIf="!resettingAllowance" style="width: 120px" (click)="resetLPAllowances()" class="btn valon-btn-warning mr-1" type="button">
+                      Reset
+                    </button>
+                    <button *ngIf="resettingAllowance" style="width: 120px" class="btn valon-btn-warning pl-0 pr-0 mr-1" type="button">
+                      <span style="width: 15px; height: 15px" class="spinner-border" role="status">
+                        <span class="sr-only"></span>
+                      </span>
+                      Resetting
+                    </button>
+                  </ng-container>
+                  <button style="width: 100px" class="btn valon-btn-primary" type="button">
+                    LPT
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+    </app-card>
+  </div>
+</div>
+
+<!-- SELECT LPT MODAL -->
+<app-ui-modal #modalDefault dialogClass="valon-box">
+  <div class="app-modal-header">
+    <h5 class="modal-title">Select Liquidity Pool Token</h5>
+    <button type="button" class="close basic-close" data-dismiss="modal" aria-label="Close" (click)="modalDefault.hide()"><span aria-hidden="true">&times;</span></button>
+  </div>
+  <div class="app-modal-body" style="text-align: center; padding-top: 0">
+
+    <ng-container *ngIf="loadingPairs">
+      <div><h2>Loading the pairs</h2></div>
+      <div  class="d-flex justify-content-center mt-4">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    </ng-container>
+
+    <form *ngIf="!loadingPairs" [formGroup]="form">
+      <div class="input-group" style="margin-bottom: 10px">
+        <input formControlName="search" type="text" class="form-control pl-2" id="coinsearch" placeholder="Search">
+        <div class="input-group-append pl-1">
+          <button style="width: 60px" class="btn valon-btn-primary" type="button">
+            <i class="feather icon-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="!loadingPairs" style="overflow-y: scroll; overflow-x: hidden; max-height: 360px">
+        <div *ngFor="let lpt of lptPairsFiltered; let i = index" class="pt-3">
+          <div>
+            <button (click)="selectLpt(lpt)" style="width: 70%; position: relative" class="btn valon-btn-primary btn-sl-sm ml-2">
+              <span style="position: absolute; top: 10px; left: 10px">
+                <img style="width: 18px; margin-right: 5px" [src]="lpt.icon0" (error)="setDefaultIcon(lpt)">
+                <img style="width: 18px; margin-right: 5px" [src]="lpt.icon1" (error)="setDefaultIcon(lpt)">
+              </span>
+              <span style="font-weight: bold">{{lpt.token0?.symbol | uppercase}}-{{lpt.token1?.symbol | uppercase}}</span>
+            </button>
+          </div>
+          <br>
+        </div>
+        <div *ngIf="lptPairsFiltered.length === 0" class="text-warning">
+          You don't have any LPT. Try adding liquidity first!
+        </div>
+      </div>
+    </form>
+
+  </div>
+  <div class="app-modal-footer">
+    <button style="font-size: 10px" type="button" class="btn valon-btn-secondary" data-dismiss="modal" (click)="modalDefault.hide()">
+      <ng-container>Close</ng-container>
+    </button>
+  </div>
+</app-ui-modal>
+
+<!-- HELP MODAL -->
+<app-ui-modal #modalHelp dialogClass="valon-box">
+  <div class="app-modal-header">
+    <h5 class="modal-title">How to use?</h5>
+    <button type="button" class="close basic-close" data-dismiss="modal" aria-label="Close" (click)="modalHelp.hide()"><span aria-hidden="true">&times;</span></button>
+  </div>
+  <div class="app-modal-body" style="text-align: center; padding-top: 0">
+
+  <div>
+    <ul class="list-group valon-help-list">
+      <li class="list-group-item">1. Select LPT pair <br>If you don't have any, add liquidity first</li>
+      <li class="list-group-item">2. Unlock the pair if locked</li>
+      <li class="list-group-item">3. Select LPT amount to remove</li>
+      <li class="list-group-item">4. Click "Remove Liquidity"</li>
+      <li class="list-group-item">5. Approve the transaction from Metamask <br>(or other connected wallet)</li>
+      <li class="list-group-item">6. Wait until the transaction finishes</li>
+      <li class="list-group-item">7. Your LPT balance should now be updated</li>
+    </ul>
+  </div>
+
+  </div>
+  <div class="app-modal-footer">
+    <button style="font-size: 10px" type="button" class="btn valon-btn-secondary" data-dismiss="modal" (click)="modalHelp.hide()">
+      <ng-container>Close</ng-container>
+    </button>
+  </div>
+</app-ui-modal>

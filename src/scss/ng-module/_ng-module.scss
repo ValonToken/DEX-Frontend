@@ -1,0 +1,76 @@
+@import '~ngx-owl-carousel-o/lib/styles/scss/owl.carousel';
+@import '~ngx-owl-carousel-o/lib/styles/scss/owl.theme.default';
+
+@import '~ngx-bar-rating/themes/br-default-theme.css';
+@import '~ngx-bar-rating/themes/br-horizontal-theme.css';
+
+@import "~ng2-toasty/style-default.css";
+@import "~ng2-toasty/style-bootstrap.css";
+@import "~ng2-toasty/style-material.css";
+
+@import "~datatables.net-dt/css/jquery.dataTables.css";
+@import "~datatables.net-buttons-dt/css/buttons.dataTables.css";
+
+@import "~ngx-lightbox/lightbox.css";
+// @import "~ic-datepicker/themes/theme-default.css";
+@import "~dragula/dist/dragula.css";
+
+@import "~ngx-bar-rating/themes/br-default-theme.css";
+@import "~ngx-bar-rating/themes/br-bootstrap-theme.css";
+@import "~ngx-bar-rating/themes/br-fontawesome-theme.css";
+@import "~ngx-bar-rating/themes/br-fontawesome-o-theme.css";
+@import "~ngx-bar-rating/themes/br-horizontal-theme.css";
+@import "~ngx-bar-rating/themes/br-vertical-theme.css";
+@import "~ngx-bar-rating/themes/br-stars-theme.css";
+@import "~ngx-bar-rating/themes/br-movie-theme.css";
+@import "~ngx-bar-rating/themes/br-square-theme.css";
+
+@import "~nouislider/distribute/nouislider.min.css";
+@import "~famfamfam-flags/dist/sprite/famfamfam-flags.min.css";
+
+@import "~tinymce/skins/lightgray/skin.min.css";
+@import "~tinymce/skins/lightgray/content.min.css";
+
+@import '~@fullcalendar/common/main.css';
+@import '~@fullcalendar/daygrid/main.css';
+@import '~@fullcalendar/timegrid/main.css';
+
+@import '~angular-archwizard/archwizard.scss';
+
+@import '~sweetalert2/src/sweetalert2.scss';
+
+@import "range-slidar";
+@import "ng-select";
+@import "ngx-chips";
+@import "ng2-archwizard";
+
+.full-data-search {
+  margin-left: 0.5em;
+  display: inline-block;
+  width: auto !important;
+}
+
+.full-data-show-entry {
+  width: 75px;
+  display: inline-block;
+}
+
+.full-data-table {
+  .glyphicon {
+    font-family: IcoFont;
+    position: absolute;
+    right: 14px;
+    font-size: 20px;
+    top: 9px;
+    &.glyphicon-triangle-bottom:before {
+      content: "\eb53";
+    }
+    &.glyphicon-triangle-top:before {
+      content: "\eb56";
+    }
+  }
+  th {
+    position: relative;
+  }
+}
+

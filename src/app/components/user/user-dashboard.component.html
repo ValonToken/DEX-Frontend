@@ -1,0 +1,106 @@
+<div class="row" class="valon-feed">
+  <div class="col-xl-12 col-md-12">
+    <app-card cardTitle="Latest Activity" [hidHeader]="true" cardClass="bg-pattern bg-blue" blockClass="valon-box-pattern">
+      <h1 class="text-center mb-4" style="text-align: left !important; color: #d0ff9a !important"><span>News Feed</span></h1>
+      <div class="latest-update-box">
+
+        <ng-container *ngFor="let post of posts; let i = index">
+          <div class="row p-b-5 mb-3" *ngIf="(!showMore && i < 3) || (showMore && i < 10)"
+          [style.border-bottom]="i < 2 ? '1px solid #12415d' : ''">
+            <div class="col-md-2 text-right update-meta">
+              <div style="color: #8fd0ff; font-size: 0.8rem;">{{post.author?.name}}</div>
+              <div><p class="text-muted m-b-0 d-inline-flex">{{post.date_published | date:'medium'}}</p></div>
+              <!--<i class="feather icon-sunrise bg-c-blue update-icon"></i>-->
+            </div>
+            <div class="col-md-10">
+              <h6 style="font-size: 0.8rem; color: #8fd0ff;">{{post.title}}</h6>
+              <p class="text-muted m-b-15" style="font-size: 0.8rem !important; color: white !important" [innerHTML]="post.content_html"></p>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+      <div class="text-right">
+        <span (click)="toggleShowMore()" style="color: white" style="cursor: pointer">View more</span>
+      </div>
+    </app-card>
+  </div>
+</div>
+
+<div class="row pl-4 pr-4">
+  <div class="col-md-12">
+    <h1 style="color: #d0ff9a">Valon Rewards</h1>
+  </div>
+  <div class="col-md-4 col-xl-4">
+    <app-card [hidHeader]="true" cardClass="bg-c-yellow order-card">
+      <h6 class="text-white">Total Rewards</h6>
+      <span *ngIf="!totalRewards" style="width: 43px; height: 43px" class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </span>
+      <h2 *ngIf="totalRewards" class="text-white">${{totalRewards}}</h2>
+      <p class="m-b-0">Value of new VALO minted</p>
+      <i class="card-icon feather icon-award"></i>
+    </app-card>
+  </div>
+  <div class="col-md-4 col-xl-4">
+    <app-card [hidHeader]="true" cardClass="bg-c-blue order-card">
+      <h6 class="text-white">Total Value Locked</h6>
+      <span *ngIf="totalValueLockedInPairs === '0'" style="width: 43px; height: 43px" class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </span>
+      <h2 *ngIf="totalValueLockedInPairs !== '0'" class="text-white">${{totalValueLockedInPairs}}</h2>
+      <p class="m-b-0">Value locked in all the pools</p>
+      <i class="card-icon feather icon-package"></i>
+    </app-card>
+  </div>
+  <div class="col-md-4 col-xl-4">
+    <app-card [hidHeader]="true" cardClass="bg-c-green order-card">
+      <h6 class="text-white">APR up to</h6>
+      <span *ngIf="apr === '0'" style="width: 43px; height: 43px" class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </span>
+      <h2 *ngIf="apr !== '0'" class="text-white">{{apr}}%</h2>
+      <p class="m-b-0">Valon Farms</p>
+      <i class="card-icon feather icon-activity"></i>
+    </app-card>
+  </div>
+</div>
+
+<div class="row pl-4 pr-4">
+  <div class="col-md-12 pt-5">
+    <h1 style="color: #d0ff9a">Token Stats</h1>
+  </div>
+  <div class="col-md-4 col-xl-4">
+    <app-card [hidHeader]="true" cardClass="bg-c-yellow order-card">
+      <h6 class="text-white">Total Supply</h6>
+      <span *ngIf="!totalSupply" style="width: 43px; height: 43px" class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </span>
+      <h2 *ngIf="totalSupply" class="text-white">{{totalSupply}} VALO</h2>
+      <p class="m-b-0">Total minted VALO</p>
+      <i class="card-icon feather icon-filter"></i>
+    </app-card>
+  </div>
+  <div class="col-md-4 col-xl-4">
+    <app-card [hidHeader]="true" cardClass="bg-c-blue order-card">
+      <h6 class="text-white">Difficulty</h6>
+      <span *ngIf="!difficulty || !maxDifficulty" style="width: 43px; height: 43px" class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </span>
+      <h2 *ngIf="difficulty && maxDifficulty" class="text-white">{{difficulty}} / {{maxDifficulty}}</h2>
+      <p class="m-b-0">Difficulty increases over time limiting minted VALO</p>
+      <i class="card-icon feather icon-trending-up"></i>
+    </app-card>
+  </div>
+  <div class="col-md-4 col-xl-4">
+    <app-card [hidHeader]="true" cardClass="bg-c-green order-card">
+      <h6 class="text-white">Rewards per block</h6>
+      <span *ngIf="!rewardsPerBlock" style="width: 43px; height: 43px" class="spinner-border" role="status">
+        <span class="sr-only"></span>
+      </span>
+      <h2 *ngIf="rewardsPerBlock" class="text-white">{{rewardsPerBlock}} VALO</h2>
+      <p class="m-b-0">Each block releases VALO for stakeholders</p>
+      <i class="card-icon feather icon-box"></i>
+    </app-card>
+  </div>
+</div>

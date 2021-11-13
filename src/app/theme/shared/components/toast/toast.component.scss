@@ -1,0 +1,46 @@
+.toast-header, .toast-body {
+    background: #0f192f;
+    border: none;
+}
+
+.toast-header {
+    color: #9ccc65;
+}
+
+.toast-header img {
+    display: none;
+}
+
+.toast-success {
+    border: 1px solid #9ccc65;
+    background-color: #2e402b;
+    background-clip: unset;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.toast-success .toast-header {
+    color: white;
+    background-color: #2e402b;
+}
+
+.toast-success .toast-body {
+    background-color: #2e402b;
+}
+
+.toast-danger {
+    border: 1px solid red;
+    background-color: #631616;
+    background-clip: unset;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.toast-danger .toast-header {
+    color: white;
+    background-color: #631616;
+}
+
+.toast-danger .toast-body {
+    background-color: #631616;
+}

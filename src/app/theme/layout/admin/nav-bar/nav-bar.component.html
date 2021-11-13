@@ -1,0 +1,16 @@
+<div class="container" *ngIf="this.nextConfig.layout === 'horizontal' && this.nextConfig.subLayout === 'horizontal-2'; else mainHeader">
+  <ng-container *ngTemplateOutlet="mainHeader"></ng-container>
+</div>
+<ng-template #mainHeader>
+  <div class="m-header">
+    <a class="mobile-menu" id="mobile-collapse" (click)="navCollapse()"><span></span></a>
+    <a [routerLink]="['/app']" class="b-brand">
+      <img id="main-logo" style="width: 90px" src="assets/images/valon/valon_title_text.png" alt="valon-dex-logo" class="logo">
+    </a>
+    <a class="mob-toggler" [ngClass]="{'on' : this.menuClass}" (click)="toggleMobOption()"><i class="feather icon-more-vertical"></i></a>
+  </div>
+  <div class="collapse navbar-collapse" [style.display]="this.collapseStyle">
+    <app-nav-left class="mr-auto"></app-nav-left>
+    <app-nav-right class="ml-auto"></app-nav-right>
+  </div>
+</ng-template>

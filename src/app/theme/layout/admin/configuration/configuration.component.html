@@ -1,0 +1,84 @@
+<div *ngIf="this.isConfig" id="styleSelector" class="menu-styler" [ngClass]="{'open': styleSelectorToggle}">
+  <!--<div class="style-toggler">
+    <a  (click)="styleSelectorToggle = !styleSelectorToggle;"></a>
+  </div>-->
+  <div class="style-block">
+    <h4 class="mb-2">Able Pro
+      <small class="font-weight-normal">v8.0 Customizer</small>
+    </h4>
+    <hr/>
+    <perfect-scrollbar [style.max-height]="'calc(100vh - 335px)'">
+      <div class="m-style-scroller">
+      <h6>Layouts</h6>
+      <div class="theme-color layout-type">
+        <a  [ngClass]="{'active': layoutType === 'menu-dark'}" (click)="setLayout('menu-dark')" data-value="menu-dark"><span></span><span></span></a>
+        <a  [ngClass]="{'active': layoutType === 'menu-light'}" (click)="setLayout('menu-light')" data-value="menu-light"><span></span><span></span></a>
+        <a  [ngClass]="{'active': layoutType === 'dark'}" (click)="setLayout('dark')" data-value="dark"><span></span><span></span></a>
+        <a  [ngClass]="{'active': layoutType === 'reset'}" (click)="setLayout('reset')" data-value="reset">Reset to Default</a>
+      </div>
+      <h6>Background Color</h6>
+      <div class="theme-color background-color flat">
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-blue'}" (click)="setHeaderBackground('background-blue');" data-value="background-blue"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-red'}" (click)="setHeaderBackground('background-red');" data-value="background-red"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-purple'}" (click)="setHeaderBackground('background-purple');" data-value="background-purple"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-info'}" (click)="setHeaderBackground('background-info');" data-value="background-info"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-green'}" (click)="setHeaderBackground('background-green');" data-value="background-green"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-dark'}" (click)="setHeaderBackground('background-dark');" data-value="background-dark"><span></span><span></span></a>
+      </div>
+      <h6>Background Gradient</h6>
+      <div class="theme-color background-color gradient">
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-grd-blue'}" (click)="setHeaderBackground('background-grd-blue');" data-value="background-grd-blue"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-grd-red'}" (click)="setHeaderBackground('background-grd-red');" data-value="background-grd-red"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-grd-purple'}" (click)="setHeaderBackground('background-grd-purple');" data-value="background-grd-purple"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-grd-info'}" (click)="setHeaderBackground('background-grd-info');" data-value="background-grd-info"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-grd-green'}" (click)="setHeaderBackground('background-grd-green');" data-value="background-grd-green"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-grd-dark'}" (click)="setHeaderBackground('background-grd-dark');" data-value="background-grd-dark"><span></span><span></span></a>
+      </div>
+      <h6>Background Image</h6>
+      <div class="theme-color background-color image">
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-img-1'}" (click)="setHeaderBackground('background-img-1');" data-value="background-img-1"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-img-2'}" (click)="setHeaderBackground('background-img-2');" data-value="background-img-2"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-img-3'}" (click)="setHeaderBackground('background-img-3');" data-value="background-img-3"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-img-4'}" (click)="setHeaderBackground('background-img-4');" data-value="background-img-4"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-img-5'}" (click)="setHeaderBackground('background-img-5');" data-value="background-img-5"><span></span><span></span></a>
+        <a  [ngClass]="{'active': headerBackgroundColor === 'background-img-6'}" (click)="setHeaderBackground('background-img-6');" data-value="background-img-6"><span></span><span></span></a>
+      </div>
+      <div class="form-group mb-2" *ngIf="nextConfig['layout'] !== 'horizontal'">
+        <div class="switch switch-primary d-inline m-r-10">
+          <input type="checkbox" id="theme-rtl" [(ngModel)]='rtlLayout' (change)="setRtlLayout($event)">
+          <label for="theme-rtl" class="cr"></label>
+        </div>
+        <label>RTL</label>
+      </div>
+      <div class="form-group mb-2" *ngIf="nextConfig['layout'] !== 'horizontal' && !nextConfig['boxLayout']">
+        <div class="switch switch-primary d-inline m-r-10">
+          <input type="checkbox" id="menu-fixed" [(ngModel)]='menuFixedLayout' (change)="setMenuFixedLayout($event)">
+          <label for="menu-fixed" class="cr"></label>
+        </div>
+        <label>Menu Fixed</label>
+      </div>
+      <div class="form-group mb-2" *ngIf="nextConfig['layout'] !== 'horizontal' && !nextConfig['boxLayout']">
+        <div class="switch switch-primary d-inline m-r-10">
+          <input type="checkbox" id="header-fixed" [(ngModel)]='headerFixedLayout' (change)="setHeaderFixedLayout($event)">
+          <label for="header-fixed" class="cr"></label>
+        </div>
+        <label>Header Fixed</label>
+      </div>
+      <div class="form-group mb-2" *ngIf="nextConfig['layout'] !== 'horizontal'">
+        <div class="switch switch-primary d-inline m-r-10">
+          <input type="checkbox" id="box-layouts" [(ngModel)]='boxLayout' (change)="setBoxLayout($event)">
+          <label for="box-layouts" class="cr"></label>
+        </div>
+        <label>Box Layouts</label>
+      </div>
+    </div>
+    </perfect-scrollbar>
+    <a href="https://themeforest.net/user/phoenixcoded" class="btn btn-success btn-block m-r-15 m-t-10 m-b-10">Profile</a>
+    <a href="http://ableproadmin.com/doc-7.0/" target="_blank" class="btn btn-primary btn-block m-r-15 m-t-5 m-b-10 ">Online Documentation</a>
+    <div class="text-center">
+      <span class="text-center f-18 m-t-15 m-b-15 d-block">Thank you for sharing !</span>
+      <a href="https://www.facebook.com/Phoenixcoded/" target="_blank" class="btn text-white bg-facebook btn-icon m-b-20"><i class="feather icon-facebook"></i></a>
+      <a href="https://twitter.com/phoenixcoded" target="_blank" class="btn text-white bg-twitter btn-icon m-l-20 m-b-20"><i class="feather icon-twitter"></i></a>
+    </div>
+  </div>
+</div>

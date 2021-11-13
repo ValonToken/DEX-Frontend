@@ -1,0 +1,528 @@
+<div class="row">
+  <div class="col-sm-12">
+
+    <!-- TOAST -->
+    <div style="z-index: 9999; position: fixed; top: 40px; right: 40px; opacity: 0.85">
+      <app-toast style="position: fixed; top: 40px; right: 40px; width: 200px" uID="toastError" toastTitle="Error" toastClass="m-b-10 toast-danger">
+        {{toastMsg}}
+      </app-toast>
+      <app-toast style="position: fixed; top: 40px; right: 40px; width: 200px" uID="toastSuccess" toastTitle="Success" toastClass="m-b-10 toast-success">
+        {{toastMsg}}
+      </app-toast>
+    </div>
+
+    <app-alert *ngIf="!state?.connected" style="margin: 20px" type="danger">Connect to a Wallet!</app-alert>
+
+    <!-- SWAP -->
+    <app-card [hidHeader]="true" cardClass="bg-pattern bg-blue" blockClass="valon-box-pattern">
+      <div class="valon-icon-color valon-anim-size-7">
+        <span (click)="openHelp()" class="valon-help-text">How to use?</span>
+        <h1 class="text-center mb-4"><span class="text-success">Valon Exchange</span></h1>
+        <h4 class="text-center mb-4">Buy & Sell Tokens</h4>
+
+        <div *ngIf="loadingPreselectedCoins" style="padding-top: 20px">
+          <div style="text-align: center"><h2>Loading Tokens</h2></div>
+          <div  class="d-flex justify-content-center mt-4">
+            <div class="spinner-border" role="status">
+              <span class="sr-only"></span>
+            </div>
+          </div>
+        </div>
+
+        <form *ngIf="!loadingPreselectedCoins" [formGroup]="form" class="row justify-content-center">
+          <div class="col-sm-9">
+            <i (click)="openSettings()" class="feather icon-settings valon-settings-icon"></i>
+            <div class="px-sm-4 py-sm-4 bg-white rounded-lg shadow-sm" style="border: 1px solid #152f49">
+              <div class="row align-items-center" style="padding: 20px">
+
+                <!-- COIN 1 -->
+                <div class="col">
+                  <div class="input-group center-flex">
+                    <button *ngIf="!form.get('coin1').value" class="btn valon-btn-primary btn-sl-sm ml-2" (click)="modalShow(true, 0)">Select a Coin</button>
+                    <div *ngIf="form.get('coin1').value" class="input-group">
+                      <input formControlName="coin1Amount" type="text" class="form-control pl-2" id="selectedCoin1" style="background: #040617">
+                      <div class="input-group-append pl-1">
+                        <button *ngIf="form.get('coin1Approved')?.value" class="btn valon-btn-primary" type="button">
+                          {{form.get('coin1')?.value?.symbol | uppercase}}
+                        </button>
+                        <button *ngIf="!form.get('coin1Approved')?.value" (click)="openAllowanceDialog(0)" class="btn valon-btn-warning" type="button">
+                          <i class="feather icon-info"></i> Unlock {{form.get('coin1')?.value?.symbol | uppercase}}
+                        </button>
+                        <button (click)="removeCoin(0)" style="width: 55px; margin-left: 5px" class="btn valon-btn-danger" type="button">
+                          <i class="feather icon-x text-danger"></i>
+                        </button>
+                      </div>
+                      <input formControlName="coin1Range" min="0" max="1" step="0.001" type="range" class="form-control-range" id="coin1Range" style="margin-top: 20px">
+                    </div>
+                  </div>
+
+                  <div *ngIf="form.get('coin1')?.value" style="padding-top: 25px; text-align: center">
+                    <button (click)="setCoinRange(1, 0.25)" style="padding: 0.3rem 1rem; margin-left: 10px"
+                    class="btn valon-btn-success" type="button">
+                      25%
+                    </button>
+                    <button (click)="setCoinRange(1, 0.5)" style="padding: 0.3rem 1rem; margin-left: 10px"
+                    class="btn valon-btn-success" type="button">
+                      50%
+                    </button>
+                    <button (click)="setCoinRange(1, 0.75)" style="padding: 0.3rem 1rem; margin-left: 10px"
+                    class="btn valon-btn-success" type="button">
+                      75%
+                    </button>
+                    <button (click)="setCoinRange(1, 1)" style="padding: 0.3rem 1rem; margin-left: 10px"
+                    class="btn valon-btn-success" type="button">
+                      Max
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-sm-auto" style="text-align: center; padding: 20px">
+                  <i class="feather icon-arrow-right text-muted f-26"></i>
+                </div>
+
+                <!-- COIN 2 -->
+                <div class="col">
+                  <div class="input-group center-flex">
+                    <button *ngIf="!form.get('coin2').value" class="btn valon-btn-primary btn-sl-sm ml-2" (click)="modalShow(true, 1)">Select a Coin</button>
+                    <div *ngIf="form.get('coin2').value" class="input-group">
+                      <input readonly type="text" class="form-control pl-2" id="selectedCoin2" style="background: #040617" [value]="tokenInfo.outputValueBN | bignumberToEthers:''">
+                      <div class="input-group-append pl-1">
+                        <button *ngIf="form.get('coin2Approved')?.value" class="btn valon-btn-primary" type="button">
+                          {{form.get('coin2')?.value?.symbol | uppercase}}
+                        </button>
+                        <button *ngIf="!form.get('coin2Approved')?.value" (click)="openAllowanceDialog(1)" class="btn valon-btn-warning" type="button">
+                          <i class="feather icon-info"></i> Unlock {{form.get('coin2')?.value?.symbol | uppercase}}
+                        </button>
+                        <button (click)="removeCoin(1)" style="width: 55px; margin-left: 5px" class="btn valon-btn-danger" type="button">
+                          <i class="feather icon-x text-danger"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="form.get('coin2')?.value" style="height: 92px; font-size: 14px; padding: 5px; padding-top: 10px">
+                    <button *ngIf="trades?.length > 0" class="btn valon-btn-primary valon-route" [innerHTML]="tokenInfo.route"></button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- INFO BOX -->
+          <div *ngIf="pairLoaded && tokenInfo.price" class="col-sm-9 mt-3">
+            <div class="px-sm-4 py-sm-4 bg-white rounded-lg shadow-sm" style="border: 1px solid #152f49">
+              <div style="padding-top: 20px" *ngIf="loadingPair">
+                <div style="text-align: center"><h2>Loading Token Info</h2></div>
+                <div  class="d-flex justify-content-center mt-4">
+                  <div class="spinner-border" role="status">
+                    <span class="sr-only"></span>
+                  </div>
+                </div>
+              </div>
+              <ng-container *ngIf="!loadingPair">
+                <div style="padding: 20px" class="row align-items-center text-center mt-2">
+                  <div class="col-sm-4 mb-2">
+                    <div style="font-weight: bold">
+                      {{tokenInfo.price}}
+                    </div>
+                    <div style="font-size: 12px" class="valon-sub-title-light">
+                      {{form.get('coin1')?.value?.symbol}} per {{form.get('coin2')?.value?.symbol}}
+                      <i class="feather icon-help-circle valon-help valon-tooltip">
+                        <span class="valon-tooltiptext">1 {{form.get('coin2')?.value?.symbol}} costs {{tokenInfo.price}} {{form.get('coin1')?.value?.symbol}}</span>
+                      </i>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div style="font-weight: bold">
+                      {{tokenInfo.price2}}
+                    </div>
+                    <div style="font-size: 12px" class="valon-sub-title-light">
+                      {{form.get('coin2')?.value?.symbol}} per {{form.get('coin1')?.value?.symbol}}
+                      <i class="feather icon-help-circle valon-help valon-tooltip">
+                        <span class="valon-tooltiptext">1 {{form.get('coin1')?.value?.symbol}} costs {{tokenInfo.price2}} {{form.get('coin2')?.value?.symbol}}</span>
+                      </i>
+                    </div>
+                  </div>
+                  <div class="col-sm-4 mb-2">
+                    <div style="font-weight: bold">
+                      {{tokenInfo.minimumReceived}}
+                    </div>
+                    <div style="font-size: 12px" class="valon-sub-title-light">
+                      Minimum {{form.get('coin2')?.value?.symbol}} received
+                      <i class="feather icon-help-circle valon-help valon-tooltip">
+                        <span class="valon-tooltiptext">Minimum amount you will receive or the transaction will revert</span>
+                      </i>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="!loadingPair">
+                <div style="padding: 20px" class="row align-items-center text-center mt-2">
+                  <div class="col-sm-4 mb-2">
+                    <div style="font-weight: bold" [class]="tokenInfo.priceImpactColor">
+                      {{tokenInfo.priceImpact}}%
+                    </div>
+                    <div style="font-size: 12px" class="valon-sub-title-light">
+                      Price impact
+                      <i class="feather icon-help-circle valon-help valon-tooltip">
+                        <span class="valon-tooltiptext">Trade size / token reserves. The higher means the more you will pay</span>
+                      </i>
+                    </div>
+                  </div>
+                  <div class="col-sm-4 mb-2">
+                    <div style="font-weight: bold">
+                      {{tokenInfo.liquidityFee}} {{form.get('coin1')?.value?.symbol}} <span style="font-size: 10px">(0.25%)</span>
+                    </div>
+                    <div style="font-size: 12px" class="valon-sub-title-light">
+                      Liquidity provider fee
+                      <i class="feather icon-help-circle valon-help valon-tooltip">
+                        <span class="valon-tooltiptext">Fee that is taken from the trade and distributed back to the liquidity providers</span>
+                      </i>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div style="font-weight: bold">
+                      {{tokenInfo.slippage}}%
+                    </div>
+                    <div style="font-size: 12px" class="valon-sub-title-light">
+                      Slippage
+                      <i class="feather icon-help-circle valon-help valon-tooltip">
+                        <span class="valon-tooltiptext">Will affect the minimum amount you will receive. Low slippage means the transactions could revert</span>
+                      </i>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="!loadingPair && moreDetails">
+                <div style="padding: 20px" class="row align-items-center text-center mt-2">
+                  <div class="col-sm-4 mb-2">
+                    <button (click)="openBscScanUrl(form.get('coin1')?.value?.address)" style="margin-left: 5px; font-size: 0.7rem" class="btn valon-btn-primary" type="button">
+                      Open {{form.get('coin1')?.value?.symbol | uppercase}} In BscScan
+                    </button>
+                  </div>
+                  <div class="col-sm-4 mb-2">
+                    <button (click)="openBscScanUrl(form.get('coin2')?.value?.address)" style="margin-left: 5px; font-size: 0.7rem" class="btn valon-btn-primary" type="button">
+                      Open {{form.get('coin2')?.value?.symbol | uppercase}} In BscScan
+                    </button>
+                  </div>
+                  <div class="col-sm-4">
+                    <button [disabled]="!pairAddress" (click)="openBscScanUrl(pairAddress)"style="margin-left: 5px; font-size: 0.7rem" class="btn valon-btn-primary" type="button">
+                      Open Pair In BscScan
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="!loadingPair">
+                <div style="padding: 0px" class="row align-items-center text-center mt-2">
+                  <div class="col-sm-4 mb-2">
+                  </div>
+                  <div class="col-sm-4 mb-2">
+                    <span *ngIf="!moreDetails" (click)="toggleMoreDetails()" style="color: white; font-size: 0.7rem; cursor: pointer">Show More</span>
+                    <span *ngIf="moreDetails" (click)="toggleMoreDetails()" style="color: white; font-size: 0.7rem; cursor: pointer">Show Less</span>
+                  </div>
+                  <div class="col-sm-4">
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+          <div *ngIf="pairLoaded" class="col-sm-12 text-center">
+            <div *ngIf="!form.get('coin1Approved')?.value || !form.get('coin2Approved')?.value" class="text-danger pt-2">
+              Unlock both coins before swapping!
+            </div>
+            <ng-container *ngIf="!swapping">
+              <button [disabled]="!form.get('coin1Approved')?.value || !form.get('coin2Approved')?.value"
+              (click)="swapTokens()" type="button" class="btn valon-btn-success mt-4">
+                <i class="feather icon-check-circle"></i>
+                Swap
+              </button>
+            </ng-container>
+            <ng-container *ngIf="swapping">
+              <button type="button" class="btn valon-btn-warning mt-4">
+                <span style="width: 15px; height: 15px" class="spinner-border" role="status">
+                  <span class="sr-only"></span>
+                </span>
+                Swapping the tokens!
+              </button>
+            </ng-container>
+          </div>
+
+        </form>
+      </div>
+    </app-card>
+
+    <!-- ALLOWANCES -->
+    <app-card *ngIf="hasAllowances()" cardTitle="Allowances" [hidHeader]="true" blockClass="valon-box">
+      <div class="valon-icon-empty valon-anim-size-10">
+        <i class="feather icon-help-circle valon-help valon-tooltip" style="position: absolute; top: 10px; right: 10px">
+          <span class="valon-tooltiptext valon-tooltip-left">The token amounts the staking contract is allowed to use on your behalf</span>
+        </i>
+          
+        <div class="pt-2 pb-2" style="border-bottom: 1px solid #4f86be">
+          <h5 class="valon-title">Allowances</h5>
+        </div>
+        
+        <ng-container>
+          <div *ngIf="!allowances?.coin1Allowance.isZero()" class="pt-3">
+            <div class="form-group fill mt-3">
+              <label class="valon-sub-title">{{form.get('coin1')?.value?.symbol}} Allowance</label>
+              <div class="input-group">
+                <input readonly type="text" class="form-control pl-2" id="removeLiquidity" [value]="allowances?.coin1Allowance | bignumberToEthers">
+                <div class="input-group-append pl-1">
+                  <button (click)="resetCoin1Allowances()" style="width: 250px" class="btn valon-btn-warning" type="button">
+                    Reset {{form.get('coin1')?.value?.symbol}} Allowance
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!allowances?.coin2Allowance.isZero()" class="pt-3">
+            <div class="form-group fill mt-3">
+              <label class="valon-sub-title">{{form.get('coin2')?.value?.symbol}} Allowance</label>
+              <div class="input-group">
+                <input readonly type="text" class="form-control pl-2" id="removeLiquidity" [value]="allowances?.coin2Allowance | bignumberToEthers">
+                <div class="input-group-append pl-1">
+                  <button (click)="resetCoin2Allowances()" style="width: 250px" class="btn valon-btn-warning" type="button">
+                    Reset {{form.get('coin2')?.value?.symbol}} Allowance
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container>
+        </ng-container>
+
+      </div>
+    </app-card>
+
+  </div>
+</div>
+
+<!-- SELECT COIN MODAL -->
+<app-ui-modal #modalDefault dialogClass="valon-box">
+  <div class="app-modal-header">
+    <h5 class="modal-title">Select A Coin</h5>
+    <button type="button" class="close basic-close" data-dismiss="modal" aria-label="Close" (click)="modalDefault.hide()"><span aria-hidden="true">&times;</span></button>
+  </div>
+  <div class="app-modal-body" style="text-align: center; padding-top: 0">
+
+    <ng-container *ngIf="loading" >
+      <div><h2>Loading the Coins</h2></div>
+      <div  class="d-flex justify-content-center mt-4">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    </ng-container>
+
+    <form *ngIf="!loading" [formGroup]="form">
+      <div class="input-group" style="margin-bottom: 10px">
+        <input formControlName="search" type="text" class="form-control pl-2" id="coinsearch" placeholder="Search">
+        <div class="input-group-append pl-1">
+          <button style="width: 60px" class="btn valon-btn-primary" type="button">
+            <i class="feather icon-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="!loading" style="overflow-y: scroll; overflow-x: hidden; max-height: 360px">
+        <div *ngFor="let coin of supportedCoinsListFiltered; let i = index" class="pt-3">
+          <div>
+            <button [disabled]="coin.symbol === 'WBNB'" style="width: 70%; position: relative" class="btn valon-btn-primary btn-sl-sm ml-2" (click)="selectCoin(coin)">
+              <img style="width: 18px; margin-right: 5px" [src]="coin.icon" (error)="setDefaultIcon(coin)">
+              <span style="font-weight: bold">{{coin.name}}</span>
+              <span style="font-size: 10px; color: #d5ffe4; position: absolute; top: 2px; right: 4px">{{coin.symbol}}</span>
+              <span style="font-size: 10px; color: #d5ffe4; position: absolute; top: 2px; left: 4px">{{coin?.data?.balance | formatNumber:2}}</span>
+            </button>
+          </div>
+          <br>
+        </div>
+      </div>
+    </form>
+
+  </div>
+  <div class="app-modal-footer">
+    <button style="font-size: 10px" type="button" class="btn valon-btn-secondary" data-dismiss="modal" (click)="modalDefault.hide()">
+      <ng-container>Close</ng-container>
+    </button>
+  </div>
+</app-ui-modal>
+
+<!-- SET ALLOWANCE MODAL -->
+<app-ui-modal dialogClass="valon-box" #modalAllowance>
+  <div class="app-modal-header">
+    <h5 class="modal-title">Set Allowance</h5>
+    <button type="button" class="close basic-close" data-dismiss="modal" aria-label="Close" (click)="modalAllowance.hide()"><span aria-hidden="true">&times;</span></button>
+  </div>
+  <div class="app-modal-body" style="text-align: center; padding-top: 0">
+
+    <ng-container *ngIf="loadingAllowance || loadingMined" >
+      <div>
+        <h2 *ngIf="loadingAllowance">Waiting for Approval</h2>
+        <h2 *ngIf="loadingMined">Confirming Transaction</h2>
+      </div>
+      <div  class="d-flex justify-content-center mt-4">
+        <div class="spinner-border" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    </ng-container>
+
+    <div *ngIf="transactionMined">
+      <i style="font-size: 60px" class="feather icon-check text-success"></i>
+      <h2>Approved!</h2>
+    </div>
+
+    <form *ngIf="!loadingAllowance && !loadingMined && !transactionMined" [formGroup]="form">
+      <div class="input-group" style="margin-bottom: 10px">
+        <input formControlName="selectedCoinAmount" type="text" class="form-control pl-2" id="allowance">
+        <div class="input-group-append pl-1">
+          <button style="width: 150px" class="btn valon-btn-primary" type="button">
+            {{form.get('selectedCoin')?.value?.symbol | uppercase}}
+          </button>
+        </div>
+        <input formControlName="selectedCoinRange" min="0" max="1" step="0.001" type="range" class="form-control-range" id="selectedCoinRange" style="margin-top: 20px">
+      </div>
+    </form>
+
+  </div>
+  <div class="app-modal-footer pb-2">
+    <ng-container *ngIf="!transactionMined">
+      <button style="font-size: 10px" type="button" class="btn valon-btn-secondary" data-dismiss="modal" (click)="modalAllowance.hide()">
+        <ng-container>Close</ng-container>
+      </button>
+      <button (click)="setAllowance(true)" [disabled]="loadingAllowance || loadingMined" style="margin-left: 5px; font-size: 10px" type="button" class="btn valon-btn-warning">
+        <ng-container>Approve Unlimited</ng-container>
+      </button>
+      <button (click)="setAllowance(false)" [disabled]="loadingAllowance || loadingMined || form.get('selectedCoinAmount')?.value <= 0"
+              style="margin-left: 5px; font-size: 10px" type="button" class="btn valon-btn-success">
+        <ng-container>Set Allowance</ng-container>
+      </button>
+    </ng-container>
+    <ng-container *ngIf="transactionMined">
+      <button style="font-size: 10px" type="button" class="btn valon-btn-success" data-dismiss="modal" (click)="modalAllowance.hide()">
+        <ng-container>Ok</ng-container>
+      </button>
+    </ng-container>
+  </div>
+</app-ui-modal>
+
+<!-- SETTINGS MODAL -->
+<app-ui-modal dialogClass="valon-box" #modalSettings>
+  <div class="app-modal-header">
+    <h5 class="modal-title">Settings</h5>
+    <!--<button type="button" class="close basic-close" data-dismiss="modal" aria-label="Close" (click)="modalSettings.hide()"><span aria-hidden="true">&times;</span></button>-->
+  </div>
+  <div class="app-modal-body" style="text-align: center; padding-top: 0">
+
+    <form [formGroup]="settingsForm">
+      <div class="pt-3">
+        <div class="form-group fill mt-3" style="text-align: left">
+          <label class="valon-sub-title">Deadline</label>
+          <div class="input-group">
+            <input formControlName="deadline" type="number" class="form-control pl-2" id="settingsDeadline" name="settingsDeadline" min="0">
+            <div class="input-group-append pl-1">
+              <button style="width: 70px" class="btn valon-btn-primary" type="button">
+                Min
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pt-3">
+        <div class="form-group fill mt-3" style="text-align: left">
+          <label class="valon-sub-title">Slippage</label>
+          <div class="input-group">
+            <input formControlName="slippage" type="number" class="form-control pl-2" id="settingsSlippage" name="settingsSlippage" min="0" max="50" step="0.1">
+            <div class="input-group-append pl-1">
+              <button (click)="setSlippage(0.1)" style="width: 70px; font-size: 10px" class="btn valon-btn-success mr-2 p-0" type="button">
+                0.1%
+              </button>
+              <button (click)="setSlippage(0.5)" style="width: 70px; font-size: 10px" class="btn valon-btn-success mr-2 p-0" type="button">
+                0.5%
+              </button>
+              <button (click)="setSlippage(1)" style="width: 70px; font-size: 10px" class="btn valon-btn-success mr-2 p-0" type="button">
+                1%
+              </button>
+              <button style="width: 70px" class="btn valon-btn-primary" type="button">
+                %
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pt-3">
+        <div class="form-group fill mt-3" style="text-align: left">
+          <label class="valon-sub-title">Gas limit</label>
+          <div class="input-group">
+            <input formControlName="gas" type="number" class="form-control pl-2" id="settingsGas" name="settingsGas" min="0">
+            <div class="input-group-append pl-1">
+              <button (click)="setGasPrice(1)" style="width: 70px; font-size: 10px" class="btn valon-btn-success mr-2 p-0" type="button">
+                Standard
+              </button>
+              <button (click)="setGasPrice(1.5)" style="width: 70px; font-size: 10px" class="btn valon-btn-success mr-2 p-0" type="button">
+                Fast
+              </button>
+              <button (click)="setGasPrice(2)" style="width: 70px; font-size: 10px" class="btn valon-btn-success mr-2 p-0" type="button">
+                Instant
+              </button>
+              <button style="width: 70px" class="btn valon-btn-primary" type="button">
+                WEI
+              </button>
+            </div>
+          </div>
+          <div>
+            <input formControlName="enableGas" style="vertical-align: middle" type="checkbox"> Enable gas override
+            <span style="float: right; font-size: 12px">({{settingsForm.get('gasGwei').value}} gwei)</span>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </div>
+  <div class="app-modal-footer pb-2">
+    <ng-container>
+      <button style="font-size: 10px" type="button" class="btn valon-btn-warning mr-2" data-dismiss="modal" (click)="resetSettings()">
+        <ng-container>Reset defaults</ng-container>
+      </button>
+      <button style="font-size: 10px" type="button" class="btn valon-btn-success" data-dismiss="modal" (click)="closeSettings()">
+        <ng-container>Save</ng-container>
+      </button>
+    </ng-container>
+  </div>
+</app-ui-modal>
+
+<!-- HELP MODAL -->
+<app-ui-modal #modalHelp dialogClass="valon-box">
+  <div class="app-modal-header">
+    <h5 class="modal-title">How to use?</h5>
+    <button type="button" class="close basic-close" data-dismiss="modal" aria-label="Close" (click)="modalHelp.hide()"><span aria-hidden="true">&times;</span></button>
+  </div>
+  <div class="app-modal-body" style="text-align: center; padding-top: 0">
+
+  <div>
+    <ul class="list-group valon-help-list">
+      <li class="list-group-item">1. Select the token you want to convert from the left selector. <br>You will spend these coins</li>
+      <li class="list-group-item">2. Select the output token from right <br>You will receive these coins</li>
+      <li class="list-group-item">3. You should have two coins selected. Eg. BNB - VALO</li>
+      <li class="list-group-item">4. Select how much you want to spend using the slider</li>
+      <li class="list-group-item">5. Unlock both coins if they are locked <br>Click the orange unlock button</li>
+      <li class="list-group-item">6. Add allowance using the allowance dialog <br>Approve & wait for results</li>
+      <li class="list-group-item">7. Confirm that the token price is correct</li>
+      <li class="list-group-item">8. High price impact refers to higher price you will pay</li>
+      <li class="list-group-item">9. You can modify slippage by clicking the settings icon</li>
+      <li class="list-group-item">10. Click Swap and approve from your wallet <br>Wait until transaction finishes</li>
+    </ul>
+  </div>
+
+  </div>
+  <div class="app-modal-footer">
+    <button style="font-size: 10px" type="button" class="btn valon-btn-secondary" data-dismiss="modal" (click)="modalHelp.hide()">
+      <ng-container>Close</ng-container>
+    </button>
+  </div>
+</app-ui-modal>
